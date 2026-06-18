@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source './**/*.{ts,tsx}';
+
+/* Dark mode via the `.dark` class on <html> (project law). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans:
+        'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Brand palette — CorporateNexus (indigo/violet). */
+    --color-brand-50: oklch(0.97 0.02 280);
+    --color-brand-500: oklch(0.58 0.2 280);
+    --color-brand-600: oklch(0.51 0.21 280);
+    --color-brand-700: oklch(0.44 0.2 280);
+}
+
+/* Respect reduced-motion preferences globally (WCAG 2.2). */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Visible focus ring for keyboard users (accessibility). */
+:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+}

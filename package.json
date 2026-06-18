@@ -1,0 +1,35 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build && vite build --ssr",
+        "type-check": "tsc --noEmit",
+        "lint": "eslint resources/js --max-warnings=0",
+        "format": "prettier --write \"resources/js/**/*.{ts,tsx,css}\""
+    },
+    "dependencies": {
+        "@inertiajs/core": "^2.0.0",
+        "@inertiajs/react": "^2.0.0",
+        "react": "^19.2.1",
+        "react-dom": "^19.2.1"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.17.0",
+        "@tailwindcss/vite": "^4.0.0",
+        "@types/node": "^22.10.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "@vitejs/plugin-react": "^4.3.4",
+        "concurrently": "^9.0.1",
+        "eslint": "^9.17.0",
+        "eslint-plugin-react-hooks": "^5.1.0",
+        "laravel-vite-plugin": "^2.0.0",
+        "prettier": "^3.4.2",
+        "tailwindcss": "^4.0.0",
+        "typescript": "^5.9.0",
+        "typescript-eslint": "^8.18.0",
+        "vite": "^7.0.7"
+    }
+}

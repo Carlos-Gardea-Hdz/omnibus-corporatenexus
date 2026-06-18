@@ -1,0 +1,36 @@
+# Dependencies
+/node_modules
+/vendor
+/auth.json
+
+# Build output
+/public/build
+/public/hot
+/public/storage
+/bootstrap/ssr
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+/storage/*.key
+/storage/pail
+
+# Caches & logs
+*.log
+.phpunit.result.cache
+/.phpunit.cache
+.phpactor.json
+
+# OS / editors
+.DS_Store
+Thumbs.db
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Homestead
+Homestead.json
+Homestead.yaml
