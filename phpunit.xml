@@ -23,8 +23,18 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <!--
+          Real PostgreSQL 18 (NOT sqlite :memory:) so DB-per-tenant isolation can
+          actually be exercised: stancl/tenancy must CREATE/DROP a real Postgres
+          database per tenant. The central testing DB (corporatenexus_testing) is
+          created by docker/pgsql/create-testing-database.sql on first init.
+        -->
+        <env name="DB_CONNECTION" value="pgsql"/>
+        <env name="DB_HOST" value="pgsql"/>
+        <env name="DB_PORT" value="5432"/>
+        <env name="DB_DATABASE" value="corporatenexus_testing"/>
+        <env name="DB_USERNAME" value="corporatenexus"/>
+        <env name="DB_PASSWORD" value="secret"/>
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

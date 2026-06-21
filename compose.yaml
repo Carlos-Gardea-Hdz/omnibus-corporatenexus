@@ -1,0 +1,95 @@
+# Local development stack (Laravel Sail style) for omnibus-corporatenexus.
+# Infra-as-code (Law 3). Host ports are remapped to avoid clashing with the
+# other OMNIBUS Sail stacks on the same machine:
+#   omnibus-cms     → 8088 / 5433 / 6380 / 5173
+#   omnibus-uniges  → 8090 / 5434 / 6381
+#   THIS (nexus)    → 8092 / 5436 / 6383 / 5176
+# Production/staging use Octane (FrankenPHP) + Traefik, not this compose file.
+#
+# CRITICAL — DB-per-tenant: stancl/tenancy creates ONE PostgreSQL database per
+# tenant (prefix `tenant_<uuid>`). The pgsql container's POSTGRES_USER is the
+# cluster superuser/owner, so it holds CREATEDB/DROPDB — required for tenant
+# provisioning. The central DB + `*_testing` central DB are created at init;
+# tenant DBs are created/dropped at runtime by tenancy.
+services:
+    laravel.test:
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.5
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP:-1000}'
+        image: sail-8.5/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-8092}:80'
+            - '${VITE_PORT:-5176}:${VITE_PORT:-5176}'
+        environment:
+            WWWUSER: '${WWWUSER:-1000}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - pgsql
+            - valkey
+            - mailpit
+    pgsql:
+        image: 'postgres:18-alpine'
+        ports:
+            - '${FORWARD_DB_PORT:-5436}:5432'
+        environment:
+            PGPASSWORD: '${DB_PASSWORD:-secret}'
+            POSTGRES_DB: '${DB_DATABASE:-corporatenexus}'
+            POSTGRES_USER: '${DB_USERNAME:-corporatenexus}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+        volumes:
+            - 'sail-pgsql:/var/lib/postgresql/data'
+            - './docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${DB_DATABASE:-corporatenexus}'
+                - '-U'
+                - '${DB_USERNAME:-corporatenexus}'
+            retries: 3
+            timeout: 5s
+    valkey:
+        image: 'valkey/valkey:8-alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6383}:6379'
+        volumes:
+            - 'sail-valkey:/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - valkey-cli
+                - ping
+            retries: 3
+            timeout: 5s
+    mailpit:
+        image: 'axllent/mailpit:latest'
+        ports:
+            - '${FORWARD_MAILPIT_PORT:-1027}:1025'
+            - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8027}:8025'
+        networks:
+            - sail
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-pgsql:
+        driver: local
+    sail-valkey:
+        driver: local
