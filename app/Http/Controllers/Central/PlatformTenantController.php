@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Central;
 
+use App\Domain\Platform\Actions\ArchiveTenant;
 use App\Domain\Platform\Actions\ChangeTenantPlan;
 use App\Domain\Platform\Actions\ReactivateTenant;
+use App\Domain\Platform\Actions\RetryTenantProvisioning;
 use App\Domain\Platform\Actions\SuspendTenant;
 use App\Domain\Platform\Data\ChangeTenantPlanData;
 use App\Domain\Platform\Data\PlatformAdminData;
@@ -46,6 +48,11 @@ final class PlatformTenantController extends Controller
                 'reactivate' => $tenant->status === TenantStatus::Suspended
                     && $tenant->status->canTransitionTo(TenantStatus::Active),
                 'change_plan' => true,
+                // Retry re-runs provisioning for a stuck/failed tenant (W3) — only
+                // offered when Failed → Pending is a legal edge.
+                'retry' => $tenant->status->canTransitionTo(TenantStatus::Pending),
+                // Archive is a graceful dead-end exit for any non-terminal tenant (W3).
+                'archive' => $tenant->status->canTransitionTo(TenantStatus::Archived),
             ],
         ]);
     }
@@ -75,6 +82,24 @@ final class PlatformTenantController extends Controller
         return redirect()
             ->route('platform.tenants.show', $tenant)
             ->with('success', __('platform.actions.plan_success'));
+    }
+
+    public function retry(Tenant $tenant, RetryTenantProvisioning $action): RedirectResponse
+    {
+        $action->handle($tenant);
+
+        return redirect()
+            ->route('platform.tenants.show', $tenant)
+            ->with('success', __('platform.actions.retry_success'));
+    }
+
+    public function archive(Tenant $tenant, ArchiveTenant $action): RedirectResponse
+    {
+        $action->handle($tenant);
+
+        return redirect()
+            ->route('platform.tenants.show', $tenant)
+            ->with('success', __('platform.actions.archive_success'));
     }
 
     /**

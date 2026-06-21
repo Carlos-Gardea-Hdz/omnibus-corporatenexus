@@ -78,7 +78,17 @@ it('provisions a pending tenant and redirects to the provisioning status page (3
     // Central registry row created in Pending; provisioning has not run yet.
     expect($tenant->status)->toBe(TenantStatus::Pending);
 
-    $response->assertRedirect(route('central.provisioning', $tenant));
+    // The redirect targets a temporary SIGNED provisioning URL (W2): it carries a
+    // signature, and the route rejects an unsigned hit.
+    $target = $response->headers->get('Location');
+    expect($target)->toBeString()
+        ->and($target)->toContain('/provisioning/'.$tenant->getKey())
+        ->and($target)->toContain('signature=');
+
+    // The signed redirect target is accepted (200); the same path unsigned is 403.
+    $this->get((string) $target)->assertOk();
+    $this->get('http://'.config('app.central_domain').'/provisioning/'.$tenant->getKey())
+        ->assertForbidden();
 
     $this->assertDatabaseHas('domains', [
         'domain' => 'wayne.'.config('app.central_domain'),

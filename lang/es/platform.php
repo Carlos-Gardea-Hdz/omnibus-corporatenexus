@@ -30,9 +30,13 @@ return [
         'suspend' => 'Suspender',
         'reactivate' => 'Reactivar',
         'change_plan' => 'Cambiar plan',
+        'retry' => 'Reintentar aprovisionamiento',
+        'archive' => 'Archivar',
         'suspend_success' => 'Organización suspendida.',
         'reactivate_success' => 'Organización reactivada.',
         'plan_success' => 'Plan de la organización actualizado.',
+        'retry_success' => 'Aprovisionamiento reiniciado para esta organización.',
+        'archive_success' => 'Organización archivada.',
         'illegal_transition' => 'Ese cambio de estado no está permitido.',
     ],
 ];

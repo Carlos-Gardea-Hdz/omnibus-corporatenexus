@@ -30,9 +30,13 @@ return [
         'suspend' => 'Suspend',
         'reactivate' => 'Reactivate',
         'change_plan' => 'Change plan',
+        'retry' => 'Retry provisioning',
+        'archive' => 'Archive',
         'suspend_success' => 'Tenant suspended.',
         'reactivate_success' => 'Tenant reactivated.',
         'plan_success' => 'Tenant plan updated.',
+        'retry_success' => 'Provisioning restarted for this tenant.',
+        'archive_success' => 'Tenant archived.',
         'illegal_transition' => 'That status change is not allowed.',
     ],
 ];

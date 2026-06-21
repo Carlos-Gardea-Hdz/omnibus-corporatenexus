@@ -6,6 +6,7 @@ use App\Domain\Tenancy\Enums\TenantPlan;
 use App\Domain\Tenancy\Enums\TenantStatus;
 use App\Domain\Tenancy\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\URL;
 use Stancl\Tenancy\Database\Models\Domain;
 
 /*
@@ -63,7 +64,8 @@ it('Central/Provisioning exposes tenant, tenant_url and is_active (pending → n
         'tenant_id' => $tenant->getKey(),
     ]);
 
-    $this->get('http://'.config('app.central_domain').route('central.provisioning', $tenant, false))
+    // Reachable only behind a temporary SIGNED URL (W2).
+    $this->get(URL::temporarySignedRoute('central.provisioning', now()->addHour(), ['tenant' => $tenant]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Central/Provisioning')
@@ -86,7 +88,8 @@ it('Central/Provisioning yields a tenant_url and is_active=true once the tenant 
     $host = 'live.'.config('app.central_domain');
     Domain::create(['domain' => $host, 'tenant_id' => $tenant->getKey()]);
 
-    $this->get('http://'.config('app.central_domain').route('central.provisioning', $tenant, false))
+    // Reachable only behind a temporary SIGNED URL (W2).
+    $this->get(URL::temporarySignedRoute('central.provisioning', now()->addHour(), ['tenant' => $tenant]))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('Central/Provisioning')

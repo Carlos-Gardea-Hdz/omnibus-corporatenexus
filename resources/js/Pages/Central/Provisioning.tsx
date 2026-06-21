@@ -8,7 +8,8 @@ type ProvisioningProps = {
     tenant: TenantData;
     tenant_url: string | null;
     is_active: boolean;
-    owner_temp_password: string | null;
+    can_reveal_credential: boolean;
+    reveal_credential_url: string | null;
 };
 
 /**
@@ -17,16 +18,24 @@ type ProvisioningProps = {
  * Pending until a worker drains it. We poll-reload only the status props every
  * 3s until `is_active`, then surface a link to the live workspace. The spinner
  * animation is suppressed under prefers-reduced-motion (a11y / WCAG 2.2).
+ *
+ * The owner credential is NEVER carried by the poll (W4): the poll only touches
+ * status props, so two concurrent ticks can never race to read-and-clear it.
+ * When provisioning completes we make a SINGLE deliberate fetch to the signed
+ * reveal endpoint, which hands out the plaintext exactly once.
  */
 export default function Provisioning({
     tenant,
     tenant_url,
     is_active,
-    owner_temp_password,
+    can_reveal_credential,
+    reveal_credential_url,
 }: ProvisioningProps) {
     const { t } = useI18n();
     const [reducedMotion, setReducedMotion] = useState(false);
+    const [ownerPassword, setOwnerPassword] = useState<string | null>(null);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const revealedRef = useRef(false);
 
     useEffect(() => {
         const query = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -41,7 +50,8 @@ export default function Provisioning({
             return;
         }
         intervalRef.current = setInterval(() => {
-            router.reload({ only: ['tenant', 'tenant_url', 'is_active', 'owner_temp_password'] });
+            // Status props only — NEVER the credential (W4: no clear-on-poll race).
+            router.reload({ only: ['tenant', 'tenant_url', 'is_active', 'can_reveal_credential', 'reveal_credential_url'] });
         }, 3000);
         return () => {
             if (intervalRef.current) {
@@ -49,6 +59,29 @@ export default function Provisioning({
             }
         };
     }, [is_active]);
+
+    // Single deliberate reveal: fetch the one-time credential exactly once when
+    // provisioning completes. The `revealedRef` guard makes a double-fire (e.g.
+    // a re-render) a no-op, and the endpoint itself is idempotent.
+    useEffect(() => {
+        if (!can_reveal_credential || !reveal_credential_url || revealedRef.current) {
+            return;
+        }
+        revealedRef.current = true;
+        void fetch(reveal_credential_url, {
+            headers: { Accept: 'application/json' },
+            credentials: 'same-origin',
+        })
+            .then((response) => (response.ok ? response.json() : null))
+            .then((body: { owner_temp_password?: string | null } | null) => {
+                if (body && typeof body.owner_temp_password === 'string') {
+                    setOwnerPassword(body.owner_temp_password);
+                }
+            })
+            .catch(() => {
+                // Swallow: a failed reveal just shows no credential, never crashes.
+            });
+    }, [can_reveal_credential, reveal_credential_url]);
 
     return (
         <AppLayout>
@@ -89,8 +122,8 @@ export default function Provisioning({
                         </>
                     )}
 
-                    {is_active && owner_temp_password ? (
-                        <OwnerCredential password={owner_temp_password} />
+                    {is_active && ownerPassword ? (
+                        <OwnerCredential password={ownerPassword} />
                     ) : null}
 
                     {is_active && tenant_url ? (

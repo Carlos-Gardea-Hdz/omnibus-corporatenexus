@@ -42,7 +42,13 @@ type ShowProps = {
     tenant: TenantDetail;
     allowed_transitions: Option[];
     assignable_plans: Option[];
-    can: { suspend: boolean; reactivate: boolean; change_plan: boolean };
+    can: {
+        suspend: boolean;
+        reactivate: boolean;
+        change_plan: boolean;
+        retry: boolean;
+        archive: boolean;
+    };
 };
 
 /**
@@ -68,7 +74,8 @@ export default function Show({
             ? t('platform.tenant.seat_limit.unlimited')
             : String(tenant.seat_limit);
 
-    const hasActions = can.suspend || can.reactivate || can.change_plan;
+    const hasActions =
+        can.suspend || can.reactivate || can.change_plan || can.retry || can.archive;
 
     return (
         <AppLayout>
@@ -192,37 +199,53 @@ function Actions({
 }: {
     tenantId: string;
     currentPlan: TenantPlan;
-    can: { suspend: boolean; reactivate: boolean; change_plan: boolean };
+    can: {
+        suspend: boolean;
+        reactivate: boolean;
+        change_plan: boolean;
+        retry: boolean;
+        archive: boolean;
+    };
     assignablePlans: Option[];
 }) {
     const { t } = useI18n();
-    const [busy, setBusy] = useState<'suspend' | 'reactivate' | null>(null);
+    const [busy, setBusy] = useState<
+        'suspend' | 'reactivate' | 'retry' | 'archive' | null
+    >(null);
 
-    const suspend = () => {
-        if (!window.confirm(t('platform.actions.suspend.confirm'))) {
-            return;
-        }
+    const patch = (action: 'suspend' | 'reactivate' | 'retry' | 'archive') => {
         router.patch(
-            `/admin/tenants/${tenantId}/suspend`,
+            `/admin/tenants/${tenantId}/${action}`,
             {},
             {
                 preserveScroll: true,
-                onStart: () => setBusy('suspend'),
+                onStart: () => setBusy(action),
                 onFinish: () => setBusy(null),
             },
         );
     };
 
-    const reactivate = () => {
-        router.patch(
-            `/admin/tenants/${tenantId}/reactivate`,
-            {},
-            {
-                preserveScroll: true,
-                onStart: () => setBusy('reactivate'),
-                onFinish: () => setBusy(null),
-            },
-        );
+    const suspend = () => {
+        if (!window.confirm(t('platform.actions.suspend.confirm'))) {
+            return;
+        }
+        patch('suspend');
+    };
+
+    const reactivate = () => patch('reactivate');
+
+    const retry = () => {
+        if (!window.confirm(t('platform.actions.retry.confirm'))) {
+            return;
+        }
+        patch('retry');
+    };
+
+    const archive = () => {
+        if (!window.confirm(t('platform.actions.archive.confirm'))) {
+            return;
+        }
+        patch('archive');
     };
 
     return (
@@ -253,6 +276,32 @@ function Actions({
                         {busy === 'reactivate'
                             ? t('platform.actions.reactivating')
                             : t('platform.actions.reactivate')}
+                    </button>
+                ) : null}
+
+                {can.retry ? (
+                    <button
+                        type="button"
+                        onClick={retry}
+                        disabled={busy !== null}
+                        className="inline-flex items-center justify-center rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-700 transition hover:bg-amber-50 disabled:opacity-60 dark:border-amber-900 dark:text-amber-300 dark:hover:bg-amber-950/40"
+                    >
+                        {busy === 'retry'
+                            ? t('platform.actions.retrying')
+                            : t('platform.actions.retry')}
+                    </button>
+                ) : null}
+
+                {can.archive ? (
+                    <button
+                        type="button"
+                        onClick={archive}
+                        disabled={busy !== null}
+                        className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                        {busy === 'archive'
+                            ? t('platform.actions.archiving')
+                            : t('platform.actions.archive')}
                     </button>
                 ) : null}
             </div>

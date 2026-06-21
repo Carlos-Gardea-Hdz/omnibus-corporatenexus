@@ -231,6 +231,18 @@ const dictionary: Dictionary = {
     'platform.actions.reactivating': { es: 'Reactivando…', en: 'Reactivating…' },
     'platform.actions.change_plan': { es: 'Cambiar plan', en: 'Change plan' },
     'platform.actions.changing_plan': { es: 'Cambiando…', en: 'Changing…' },
+    'platform.actions.retry': { es: 'Reintentar aprovisionamiento', en: 'Retry provisioning' },
+    'platform.actions.retrying': { es: 'Reintentando…', en: 'Retrying…' },
+    'platform.actions.retry.confirm': {
+        es: '¿Reintentar el aprovisionamiento de esta organización? Se volverá a ejecutar la creación de su base de datos.',
+        en: 'Retry provisioning for this tenant? Its database setup will run again.',
+    },
+    'platform.actions.archive': { es: 'Archivar', en: 'Archive' },
+    'platform.actions.archiving': { es: 'Archivando…', en: 'Archiving…' },
+    'platform.actions.archive.confirm': {
+        es: '¿Archivar esta organización? Es una acción permanente y dejará de poder transicionar.',
+        en: 'Archive this tenant? This is permanent and it can no longer transition.',
+    },
     'platform.actions.change_plan.label': {
         es: 'Nuevo plan',
         en: 'New plan',

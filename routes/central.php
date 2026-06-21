@@ -33,8 +33,21 @@ Route::middleware('web')->group(function (): void {
 
     // Provisioning-status page. Route-model binding resolves the Tenant on the
     // central connection (UUIDv7 key). The React page polls it while pending.
-    Route::get('/provisioning/{tenant}', [ProvisioningStatusController::class, 'show'])
-        ->name('central.provisioning');
+    //
+    // SIGNED (W2): only the registrant — who holds the temporary signed URL the
+    // registration redirect handed them — can reach this page or the owner
+    // credential. A stranger who guesses the tenant UUID gets a 403. The React
+    // poller's `router.reload` preserves the query signature, so polling works.
+    Route::middleware('signed')->group(function (): void {
+        Route::get('/provisioning/{tenant}', [ProvisioningStatusController::class, 'show'])
+            ->name('central.provisioning');
+
+        // Deliberate, single-read reveal of the owner's one-time temp password
+        // (W4): the page fetches this ONCE when provisioning completes, never on a
+        // poll tick — so there is no read-and-clear race. Idempotent + signed.
+        Route::get('/provisioning/{tenant}/credential', [ProvisioningStatusController::class, 'reveal'])
+            ->name('central.provisioning.credential');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -78,5 +91,14 @@ Route::middleware('web')->group(function (): void {
             ->name('platform.tenants.reactivate');
         Route::patch('/tenants/{tenant}/plan', [PlatformTenantController::class, 'changePlan'])
             ->name('platform.tenants.plan');
+
+        // Operator recovery for stuck/failed tenants (W3): retry re-runs
+        // provisioning (Failed → Pending + re-dispatch the pipeline); archive is a
+        // graceful exit. Both are guarded by canTransitionTo() in their Actions —
+        // an illegal transition is a 302 + error, never a 500.
+        Route::patch('/tenants/{tenant}/retry', [PlatformTenantController::class, 'retry'])
+            ->name('platform.tenants.retry');
+        Route::patch('/tenants/{tenant}/archive', [PlatformTenantController::class, 'archive'])
+            ->name('platform.tenants.archive');
     });
 });

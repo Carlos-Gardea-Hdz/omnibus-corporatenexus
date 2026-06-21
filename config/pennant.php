@@ -38,7 +38,14 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => null,
+            // Pin to the CENTRAL connection (W1). A null connection would resolve
+            // flags against the tenant-swapped default connection inside tenant
+            // context, but the `features` table migration lives ONLY in the central
+            // DB (database/migrations), never in tenant DBs — so resolving a flag in
+            // a tenant route would throw 42P01 "relation features does not exist".
+            // Feature flags are plan-derived central state (multitenancy §4); always
+            // store/resolve them on central regardless of the active tenant.
+            'connection' => env('DB_CONNECTION', 'central'),
             'table' => 'features',
         ],
 
