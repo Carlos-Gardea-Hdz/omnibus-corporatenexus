@@ -12,6 +12,7 @@ declare module '@inertiajs/core' {
             flash: {
                 success: string | null;
                 error: string | null;
+                temp_password: string | null;
             };
             cspNonce: string | null;
         };

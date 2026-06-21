@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Domain\Membership\Enums\MemberRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +21,7 @@ class UserFactory extends Factory
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
+     * Define the model's default state. Entirely fictional data — never real PII.
      *
      * @return array<string, mixed>
      */
@@ -30,6 +31,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'role' => MemberRole::Member,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
@@ -40,8 +42,24 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /** The tenant owner (the singleton authority). */
+    public function owner(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'role' => MemberRole::Owner,
+        ]);
+    }
+
+    /** A tenant administrator (may manage members, may not touch the owner). */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'role' => MemberRole::Admin,
         ]);
     }
 }

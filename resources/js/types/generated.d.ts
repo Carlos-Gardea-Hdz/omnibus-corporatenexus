@@ -1,3 +1,27 @@
+declare namespace App.Domain.Membership.Data {
+export type InviteMemberData = {
+name: string;
+email: string;
+role: App.Domain.Membership.Enums.MemberRole;
+};
+export type LoginData = {
+email: string;
+password: string;
+remember: boolean;
+};
+export type MemberData = {
+id: number;
+name: string;
+email: string;
+role: App.Domain.Membership.Enums.MemberRole;
+};
+export type UpdateMemberRoleData = {
+role: App.Domain.Membership.Enums.MemberRole;
+};
+}
+declare namespace App.Domain.Membership.Enums {
+export type MemberRole = 'owner' | 'admin' | 'member';
+}
 declare namespace App.Domain.Tenancy.Data {
 export type CreateTenantData = {
 name: string;

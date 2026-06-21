@@ -39,6 +39,8 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+        <!-- Host-only session cookie (W1): never wildcard across tenant subdomains. -->
+        <env name="SESSION_DOMAIN" value="null"/>
         <env name="PENNANT_STORE" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

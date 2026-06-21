@@ -14,6 +14,39 @@ arch('domain enums are backed')
     ->expect('App\Domain\Tenancy\Enums')
     ->toBeEnums();
 
+/*
+| Membership domain (slice 002) — same DDD-Lite guarantees as Tenancy. The
+| domain is HTTP-agnostic (the App\Domain guard above already forbids
+| Illuminate\Http for the whole domain layer; restated here for the slice).
+*/
+arch('membership domain stays off the HTTP layer')
+    ->expect('App\Domain\Membership')
+    ->not->toUse('Illuminate\Http');
+
+arch('membership enums are backed')
+    ->expect('App\Domain\Membership\Enums')
+    ->toBeEnums();
+
+arch('membership actions are final classes')
+    ->expect('App\Domain\Membership\Actions')
+    ->toBeClasses()
+    ->toBeFinal();
+
+arch('membership output DTOs are final')
+    ->expect('App\Domain\Membership\Data')
+    ->toBeClasses()
+    ->toBeFinal();
+
+/*
+| Central ↛ tenant-user coupling guard. Central controllers operate only on the
+| central registry; the tenant User model belongs to tenant context. (The
+| provisioning controller may surface a one-time owner credential as a prop, but
+| it must never import or query the tenant User model directly.)
+*/
+arch('central controllers do not touch the tenant User model')
+    ->expect('App\Http\Controllers\Central')
+    ->not->toUse('App\Models\User');
+
 arch('actions are final and live in the domain layer')
     ->expect('App\Domain\Tenancy\Actions')
     ->toBeClasses()

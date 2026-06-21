@@ -8,6 +8,7 @@ type ProvisioningProps = {
     tenant: TenantData;
     tenant_url: string | null;
     is_active: boolean;
+    owner_temp_password: string | null;
 };
 
 /**
@@ -17,7 +18,12 @@ type ProvisioningProps = {
  * 3s until `is_active`, then surface a link to the live workspace. The spinner
  * animation is suppressed under prefers-reduced-motion (a11y / WCAG 2.2).
  */
-export default function Provisioning({ tenant, tenant_url, is_active }: ProvisioningProps) {
+export default function Provisioning({
+    tenant,
+    tenant_url,
+    is_active,
+    owner_temp_password,
+}: ProvisioningProps) {
     const { t } = useI18n();
     const [reducedMotion, setReducedMotion] = useState(false);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -35,7 +41,7 @@ export default function Provisioning({ tenant, tenant_url, is_active }: Provisio
             return;
         }
         intervalRef.current = setInterval(() => {
-            router.reload({ only: ['tenant', 'tenant_url', 'is_active'] });
+            router.reload({ only: ['tenant', 'tenant_url', 'is_active', 'owner_temp_password'] });
         }, 3000);
         return () => {
             if (intervalRef.current) {
@@ -83,6 +89,10 @@ export default function Provisioning({ tenant, tenant_url, is_active }: Provisio
                         </>
                     )}
 
+                    {is_active && owner_temp_password ? (
+                        <OwnerCredential password={owner_temp_password} />
+                    ) : null}
+
                     {is_active && tenant_url ? (
                         // A plain anchor (NOT Inertia <Link>): the tenant lives on a
                         // different subdomain/SPA, so this must be a full cross-origin
@@ -98,5 +108,45 @@ export default function Provisioning({ tenant, tenant_url, is_active }: Provisio
                 </div>
             </section>
         </AppLayout>
+    );
+}
+
+/**
+ * One-time reveal of the owner's temporary password — the single sanctioned
+ * place a credential reaches a prop (email delivery is deferred). It is shown
+ * once after provisioning completes; never persisted into any list prop.
+ */
+function OwnerCredential({ password }: { password: string }) {
+    const { t } = useI18n();
+    const [copied, setCopied] = useState(false);
+
+    const copy = () => {
+        void navigator.clipboard?.writeText(password).then(() => {
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
+    return (
+        <div className="mt-4 w-full rounded-xl border border-amber-300 bg-amber-50 p-4 text-left dark:border-amber-900 dark:bg-amber-950/40">
+            <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                {t('provisioning.owner_credential.title')}
+            </h2>
+            <p className="mt-1 text-xs text-amber-800 dark:text-amber-300">
+                {t('provisioning.owner_credential.hint')}
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+                <code className="flex-1 rounded-md border border-amber-300 bg-white px-3 py-2 font-mono text-sm text-slate-900 dark:border-amber-900 dark:bg-slate-900 dark:text-slate-100">
+                    {password}
+                </code>
+                <button
+                    type="button"
+                    onClick={copy}
+                    className="rounded-md border border-amber-400 px-3 py-2 text-sm font-medium text-amber-900 transition hover:bg-amber-100 dark:border-amber-800 dark:text-amber-200 dark:hover:bg-amber-950/60"
+                >
+                    {copied ? t('members.temp_password.copied') : t('members.temp_password.copy')}
+                </button>
+            </div>
+        </div>
     );
 }

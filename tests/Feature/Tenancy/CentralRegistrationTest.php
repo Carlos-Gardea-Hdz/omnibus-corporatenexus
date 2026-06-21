@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Domain\Tenancy\Enums\TenantStatus;
 use App\Domain\Tenancy\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Stancl\Tenancy\Events\TenantCreated;
 
@@ -21,6 +22,21 @@ use Stancl\Tenancy\Events\TenantCreated;
 */
 
 uses(RefreshDatabase::class);
+
+/*
+| Real-DB tenancy suites (no RefreshDatabase) commit central registry rows and
+| clean them in their own beforeEach, so a row can survive to the next test.
+| RefreshDatabase only triggers its one-time migrate:fresh for the FIRST such
+| test in the run; if a RefreshDatabase test elsewhere already consumed it, a
+| committed leftover is visible (inside this test's transaction) and would skew
+| the exact tenant-count assertions below. Clear the central registry up front so
+| these counts are deterministic regardless of suite ordering; the transaction
+| still rolls everything back afterwards.
+*/
+beforeEach(function (): void {
+    DB::table('domains')->delete();
+    DB::table('tenants')->delete();
+});
 
 function registerUrl(): string
 {

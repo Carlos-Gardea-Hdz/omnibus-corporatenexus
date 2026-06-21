@@ -52,7 +52,101 @@ const dictionary: Dictionary = {
     'dashboard.welcome': { es: 'Bienvenido a', en: 'Welcome to' },
     'dashboard.plan': { es: 'Plan', en: 'Plan' },
     'dashboard.status': { es: 'Estado', en: 'Status' },
+    'dashboard.members': { es: 'Miembros', en: 'Members' },
+    'dashboard.seats': { es: 'Asientos', en: 'Seats' },
+    'dashboard.you': { es: 'Tu sesión', en: 'Your session' },
+    'dashboard.manage_members': { es: 'Gestionar miembros', en: 'Manage members' },
     'welcome.cta': { es: 'Comenzar', en: 'Get started' },
+
+    // --- Auth (mirrors lang/{es,en}/auth.php) ---
+    'auth.failed': {
+        es: 'Estas credenciales no coinciden con nuestros registros.',
+        en: 'These credentials do not match our records.',
+    },
+    'auth.login.title': { es: 'Inicia sesión', en: 'Sign in' },
+    'auth.login.email': { es: 'Correo electrónico', en: 'Email' },
+    'auth.login.password': { es: 'Contraseña', en: 'Password' },
+    'auth.login.remember': { es: 'Recordarme', en: 'Remember me' },
+    'auth.login.submit': { es: 'Entrar', en: 'Sign in' },
+    'auth.login.submitting': { es: 'Entrando…', en: 'Signing in…' },
+    'auth.logout': { es: 'Cerrar sesión', en: 'Sign out' },
+
+    // --- Members (mirrors lang/{es,en}/members.php) ---
+    'members.role.owner': { es: 'Propietario', en: 'Owner' },
+    'members.role.admin': { es: 'Administrador', en: 'Admin' },
+    'members.role.member': { es: 'Miembro', en: 'Member' },
+    'members.title': { es: 'Miembros', en: 'Members' },
+    'members.subtitle': {
+        es: 'Gestiona quién pertenece a tu organización.',
+        en: 'Manage who belongs to your organization.',
+    },
+    'members.invite': { es: 'Invitar miembro', en: 'Invite member' },
+    'members.invite.name': { es: 'Nombre', en: 'Name' },
+    'members.invite.email': { es: 'Correo electrónico', en: 'Email' },
+    'members.invite.role': { es: 'Rol', en: 'Role' },
+    'members.invite.submit': { es: 'Enviar invitación', en: 'Send invitation' },
+    'members.invite.submitting': { es: 'Invitando…', en: 'Inviting…' },
+    'members.update_role': { es: 'Actualizar rol', en: 'Update role' },
+    'members.remove': { es: 'Eliminar', en: 'Remove' },
+    'members.remove.confirm': {
+        es: '¿Eliminar a este miembro? Esta acción no se puede deshacer.',
+        en: 'Remove this member? This cannot be undone.',
+    },
+    'members.created': { es: 'Miembro invitado.', en: 'Member invited.' },
+    'members.updated': { es: 'Rol actualizado.', en: 'Role updated.' },
+    'members.removed': { es: 'Miembro eliminado.', en: 'Member removed.' },
+    'members.you_badge': { es: 'Tú', en: 'You' },
+    'members.empty': {
+        es: 'Aún no hay otros miembros.',
+        en: 'No other members yet.',
+    },
+    'members.table.name': { es: 'Nombre', en: 'Name' },
+    'members.table.email': { es: 'Correo', en: 'Email' },
+    'members.table.role': { es: 'Rol', en: 'Role' },
+    'members.table.actions': { es: 'Acciones', en: 'Actions' },
+    'members.temp_password.title': {
+        es: 'Credencial de un solo uso',
+        en: 'One-time credential',
+    },
+    'members.temp_password.hint': {
+        es: 'Comparte esta contraseña temporal de forma segura. No volverá a mostrarse.',
+        en: 'Share this temporary password securely. It will not be shown again.',
+    },
+    'members.temp_password.copy': { es: 'Copiar', en: 'Copy' },
+    'members.temp_password.copied': { es: 'Copiado', en: 'Copied' },
+    'members.seat.unlimited': { es: 'Asientos ilimitados', en: 'Unlimited seats' },
+    'members.seat.used': { es: 'usados', en: 'used' },
+    'members.seat.remaining': { es: 'disponibles', en: 'remaining' },
+    'members.error.seat_limit': {
+        es: 'Has alcanzado el límite de asientos de tu plan.',
+        en: 'You have reached your plan seat limit.',
+    },
+    'members.error.owner_protected': {
+        es: 'El propietario no puede ser degradado de esta forma.',
+        en: 'The owner cannot be demoted this way.',
+    },
+    'members.error.cannot_remove_owner': {
+        es: 'No puedes eliminar al único propietario.',
+        en: 'You cannot remove the sole owner.',
+    },
+    'members.error.cannot_remove_self': {
+        es: 'No puedes eliminarte a ti mismo.',
+        en: 'You cannot remove yourself.',
+    },
+    'members.error.role_not_assignable': {
+        es: 'No tienes permiso para asignar ese rol.',
+        en: 'You are not allowed to assign that role.',
+    },
+
+    // --- Provisioning owner credential (extends Central/Provisioning) ---
+    'provisioning.owner_credential.title': {
+        es: 'Credencial del propietario',
+        en: 'Owner credential',
+    },
+    'provisioning.owner_credential.hint': {
+        es: 'Guarda esta contraseña temporal del propietario. Solo se muestra una vez.',
+        en: 'Save this temporary owner password. It is shown only once.',
+    },
 };
 
 type I18nContextValue = {

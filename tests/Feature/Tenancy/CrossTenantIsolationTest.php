@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Domain\Membership\Enums\MemberRole;
 use App\Domain\Tenancy\Actions\CreateTenant;
 use App\Domain\Tenancy\Data\CreateTenantData;
 use App\Domain\Tenancy\Enums\TenantPlan;
 use App\Domain\Tenancy\Models\Tenant;
 use App\Models\Note;
+use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Stancl\Tenancy\Database\DatabaseManager;
@@ -141,6 +143,52 @@ it('isolates tenant data by physical database (Eloquent and raw query)', functio
     $reread = Note::find($noteId);
     expect($reread)->not->toBeNull()
         ->and($reread->body)->toBe('only-A-should-see-this');
+    tenancy()->end();
+});
+
+it('isolates the new tenant-owned members table across tenants (Eloquent and raw)', function () use (&$provisioned): void {
+    $tenantA = provisionTenant('Members Tenant A', 'malpha');
+    $tenantB = provisionTenant('Members Tenant B', 'mbravo');
+    $provisioned = [$tenantA, $tenantB];
+
+    // Write a member in tenant A's context.
+    tenancy()->initialize($tenantA);
+    $member = User::factory()->admin()->create([
+        'name' => 'A-only Member',
+        'email' => 'member@malpha.test',
+    ]);
+    $memberId = $member->getKey();
+
+    // A sees its own member, via Eloquent and raw query.
+    expect(User::query()->where('email', 'member@malpha.test')->count())->toBe(1);
+    $rawA = DB::select('select count(*) as c from users where email = ?', ['member@malpha.test']);
+    expect((int) $rawA[0]->c)->toBe(1);
+    tenancy()->end();
+
+    // Tenant B must see NOTHING of A's member.
+    tenancy()->initialize($tenantB);
+
+    // READ — Eloquent + raw: zero rows for A's member on B's connection.
+    expect(User::query()->where('email', 'member@malpha.test')->count())->toBe(0)
+        ->and(User::find($memberId))->toBeNull();
+    $rawB = DB::select('select count(*) as c from users where email = ?', ['member@malpha.test']);
+    expect((int) $rawB[0]->c)->toBe(0);
+
+    // UPDATE — Eloquent + raw affect zero rows in B.
+    expect(User::query()->where('email', 'member@malpha.test')->update(['role' => MemberRole::Owner->value]))->toBe(0)
+        ->and(DB::update('update users set name = ? where email = ?', ['pwned', 'member@malpha.test']))->toBe(0);
+
+    // DELETE — Eloquent + raw affect zero rows in B.
+    expect(User::query()->where('email', 'member@malpha.test')->delete())->toBe(0)
+        ->and(DB::delete('delete from users where email = ?', ['member@malpha.test']))->toBe(0);
+    tenancy()->end();
+
+    // Back in A: the member row is intact and untouched.
+    tenancy()->initialize($tenantA);
+    $reread = User::find($memberId);
+    expect($reread)->not->toBeNull()
+        ->and($reread->name)->toBe('A-only Member')
+        ->and($reread->role)->toBe(MemberRole::Admin);
     tenancy()->end();
 });
 

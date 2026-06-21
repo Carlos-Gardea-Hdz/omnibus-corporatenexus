@@ -46,6 +46,10 @@ final class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn (): ?string => $this->stringFlash($request, 'success'),
                 'error' => fn (): ?string => $this->stringFlash($request, 'error'),
+                // One-shot reveal of a freshly invited member's temp password
+                // (slice 002, F3). A transient flash only — never a list prop,
+                // never logged. The inviter sees it once, then it is gone.
+                'temp_password' => fn (): ?string => $this->stringFlash($request, 'temp_password'),
             ],
             'cspNonce' => $request->attributes->get('csp_nonce'),
         ];
