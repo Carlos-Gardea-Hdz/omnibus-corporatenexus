@@ -6,17 +6,18 @@ use App\Domain\Tenancy\Actions\CreateTenant;
 use App\Domain\Tenancy\Data\CreateTenantData;
 use App\Domain\Tenancy\Enums\TenantPlan;
 use App\Domain\Tenancy\Models\Tenant;
-use App\Models\Note;
+use App\Domain\Work\Enums\ProjectStatus;
+use App\Domain\Work\Models\Project;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Stancl\Tenancy\Database\DatabaseManager;
 use Stancl\Tenancy\Jobs\CreateDatabase;
 
 /**
- * Cross-tenant isolation for the data surfaced by the new Tenant/Landing page
- * (notes_count). This complements the foundation CrossTenantIsolationTest by
- * exercising the SAME tenant-owned table (notes) through the landing read path:
- * a note written as tenant A must be invisible AND immutable to tenant B, via
+ * Cross-tenant isolation for the data surfaced by the Tenant/Landing page
+ * (projects_count). This complements the foundation CrossTenantIsolationTest by
+ * exercising a tenant-owned table (projects) through the landing read path: a
+ * project written as tenant A must be invisible AND immutable to tenant B, via
  * Eloquent AND a raw query, and the two tenants must resolve to distinct
  * physical databases.
  *
@@ -75,7 +76,7 @@ function provisionLandingTenant(string $name, string $subdomain): Tenant
     return $tenant;
 }
 
-it('isolates landing note data between tenants (Eloquent and raw; distinct DBs)', function () use (&$provisioned): void {
+it('isolates landing project data between tenants (Eloquent and raw; distinct DBs)', function () use (&$provisioned): void {
     $tenantA = provisionLandingTenant('Landing A', 'landa');
     $tenantB = provisionLandingTenant('Landing B', 'landb');
     $provisioned = [$tenantA, $tenantB];
@@ -87,29 +88,33 @@ it('isolates landing note data between tenants (Eloquent and raw; distinct DBs)'
         ->and($dbA)->toStartWith('tenant_')
         ->and($dbB)->toStartWith('tenant_');
 
-    // Write a note as tenant A.
+    // Write a project as tenant A.
     tenancy()->initialize($tenantA);
-    $note = Note::create(['title' => 'landing-secret', 'body' => 'A-only']);
-    $aId = $note->getKey();
-    expect(Note::query()->count())->toBe(1);
+    $project = Project::create([
+        'name' => 'landing-secret',
+        'description' => 'A-only',
+        'status' => ProjectStatus::Active,
+    ]);
+    $aId = $project->getKey();
+    expect(Project::query()->count())->toBe(1);
     tenancy()->end();
 
     // Tenant B sees nothing — read (Eloquent + raw), update, delete all no-op.
     tenancy()->initialize($tenantB);
-    expect(Note::query()->count())->toBe(0)
-        ->and(Note::find($aId))->toBeNull();
+    expect(Project::query()->count())->toBe(0)
+        ->and(Project::find($aId))->toBeNull();
 
-    $rawB = DB::select('select count(*) as c from notes where title = ?', ['landing-secret']);
+    $rawB = DB::select('select count(*) as c from projects where name = ?', ['landing-secret']);
     expect((int) $rawB[0]->c)->toBe(0)
-        ->and(Note::query()->where('title', 'landing-secret')->update(['body' => 'pwned']))->toBe(0)
-        ->and(DB::update('update notes set body = ? where title = ?', ['pwned', 'landing-secret']))->toBe(0)
-        ->and(Note::query()->where('title', 'landing-secret')->delete())->toBe(0)
-        ->and(DB::delete('delete from notes where title = ?', ['landing-secret']))->toBe(0);
+        ->and(Project::query()->where('name', 'landing-secret')->update(['description' => 'pwned']))->toBe(0)
+        ->and(DB::update('update projects set description = ? where name = ?', ['pwned', 'landing-secret']))->toBe(0)
+        ->and(Project::query()->where('name', 'landing-secret')->delete())->toBe(0)
+        ->and(DB::delete('delete from projects where name = ?', ['landing-secret']))->toBe(0);
     tenancy()->end();
 
-    // Tenant A's note is intact and its landing count still reflects only its own row.
-    expect($tenantA->run(fn (): int => Note::query()->count()))->toBe(1);
+    // Tenant A's project is intact and its landing count still reflects only its own row.
+    expect($tenantA->run(fn (): int => Project::query()->count()))->toBe(1);
     tenancy()->initialize($tenantA);
-    expect(Note::find($aId)?->body)->toBe('A-only');
+    expect(Project::find($aId)?->description)->toBe('A-only');
     tenancy()->end();
 });

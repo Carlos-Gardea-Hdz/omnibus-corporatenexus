@@ -5,15 +5,17 @@ import type { TenantData } from '@/types';
 
 type LandingProps = {
     tenant: TenantData;
-    notes_count: number;
+    projects_count: number;
+    open_tasks_count: number;
 };
 
 /**
  * Minimal tenant landing. Rendered AFTER tenancy identification on the tenant
- * domain, so `notes_count` is a live COUNT from the TENANT notes table — the
- * visible proof that we are inside tenant-DB context (multitenancy isolation).
+ * domain, so `projects_count` / `open_tasks_count` are live COUNTs from the
+ * TENANT projects/tasks tables — the visible proof that we are inside tenant-DB
+ * context (multitenancy isolation). `open_tasks_count` excludes `done` tasks.
  */
-export default function Landing({ tenant, notes_count }: LandingProps) {
+export default function Landing({ tenant, projects_count, open_tasks_count }: LandingProps) {
     const { t } = useI18n();
 
     return (
@@ -25,9 +27,10 @@ export default function Landing({ tenant, notes_count }: LandingProps) {
                     {t('landing.welcome')} {tenant.name}
                 </h1>
 
-                <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+                <dl className="mt-6 grid gap-4 sm:grid-cols-3">
                     <Stat label={t('dashboard.plan')} value={tenant.plan} />
-                    <Stat label={t('landing.notes_count')} value={`${notes_count}`} />
+                    <Stat label={t('landing.projects_count')} value={`${projects_count}`} />
+                    <Stat label={t('landing.open_tasks_count')} value={`${open_tasks_count}`} />
                 </dl>
             </section>
         </AppLayout>

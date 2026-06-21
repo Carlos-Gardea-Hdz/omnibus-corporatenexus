@@ -7,7 +7,7 @@ import { useI18n } from '@/lib/i18n';
  * `tenant.logout`, never a GET link. `current` highlights the active page for
  * orientation (aria-current for assistive tech).
  */
-export function TenantNav({ current }: { current: 'dashboard' | 'members' }) {
+export function TenantNav({ current }: { current: 'dashboard' | 'projects' | 'members' }) {
     const { t } = useI18n();
 
     const logout = () => {
@@ -33,6 +33,13 @@ export function TenantNav({ current }: { current: 'dashboard' | 'members' }) {
                     aria-current={current === 'dashboard' ? 'page' : undefined}
                 >
                     {t('nav.dashboard')}
+                </Link>
+                <Link
+                    href="/projects"
+                    className={linkClass(current === 'projects')}
+                    aria-current={current === 'projects' ? 'page' : undefined}
+                >
+                    {t('work.projects.title')}
                 </Link>
                 <Link
                     href="/members"

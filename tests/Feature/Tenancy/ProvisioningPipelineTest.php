@@ -8,7 +8,7 @@ use App\Domain\Tenancy\Enums\TenantPlan;
 use App\Domain\Tenancy\Enums\TenantStatus;
 use App\Domain\Tenancy\Jobs\MarkTenantActive;
 use App\Domain\Tenancy\Models\Tenant;
-use App\Models\Note;
+use App\Domain\Work\Models\Project;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -83,7 +83,7 @@ it('creates the tenant database, runs tenant migrations, seeds it, and flips sta
     // 1) Physical tenant database.
     (new CreateDatabase($tenant))->handle(app(DatabaseManager::class));
 
-    // 2) Tenant migrations (notes + users live under migrations/tenant).
+    // 2) Tenant migrations (projects + tasks + users live under migrations/tenant).
     tenancy()->initialize($tenant);
     Artisan::call('migrate', [
         '--path' => 'database/migrations/tenant',
@@ -91,11 +91,12 @@ it('creates the tenant database, runs tenant migrations, seeds it, and flips sta
         '--force' => true,
     ]);
 
-    // The tenant DB physically holds the notes table (proof migrations ran).
-    expect(Schema::hasTable('notes'))->toBeTrue();
+    // The tenant DB physically holds the Work tables (proof migrations ran).
+    expect(Schema::hasTable('projects'))->toBeTrue()
+        ->and(Schema::hasTable('tasks'))->toBeTrue();
     tenancy()->end();
 
-    // 3) Seed the tenant DB with fictional demo notes (TenantDatabaseSeeder).
+    // 3) Seed the tenant DB with fictional demo work (TenantDatabaseSeeder).
     (new SeedDatabase($tenant))->handle();
 
     // 4) Activation job — central status flips Pending → Active.
@@ -103,7 +104,7 @@ it('creates the tenant database, runs tenant migrations, seeds it, and flips sta
 
     // --- Assertions --------------------------------------------------------
     // Seed rows landed inside the tenant DB.
-    $seededCount = $tenant->run(fn (): int => Note::query()->count());
+    $seededCount = $tenant->run(fn (): int => Project::query()->count());
     expect($seededCount)->toBeGreaterThan(0);
 
     // Central status flipped to Active (re-read from the central connection).

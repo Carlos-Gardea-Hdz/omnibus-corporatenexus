@@ -44,9 +44,13 @@ const dictionary: Dictionary = {
     },
     'landing.title': { es: 'Inicio', en: 'Home' },
     'landing.welcome': { es: 'Bienvenido a', en: 'Welcome to' },
-    'landing.notes_count': {
-        es: 'notas en este espacio',
-        en: 'notes in this workspace',
+    'landing.projects_count': {
+        es: 'proyectos en este espacio',
+        en: 'projects in this workspace',
+    },
+    'landing.open_tasks_count': {
+        es: 'tareas abiertas',
+        en: 'open tasks',
     },
     'dashboard.title': { es: 'Panel', en: 'Dashboard' },
     'dashboard.welcome': { es: 'Bienvenido a', en: 'Welcome to' },
@@ -235,6 +239,77 @@ const dictionary: Dictionary = {
         es: 'No hay acciones disponibles para esta organización.',
         en: 'No actions are available for this tenant.',
     },
+
+    // --- Work: Projects & Tasks (mirrors lang/{es,en}/work.php) ---
+    // Enum labels — mirror the backed enum label() keys exactly.
+    'work.project_status.planning': { es: 'Planificación', en: 'Planning' },
+    'work.project_status.active': { es: 'Activo', en: 'Active' },
+    'work.project_status.completed': { es: 'Completado', en: 'Completed' },
+    'work.project_status.archived': { es: 'Archivado', en: 'Archived' },
+    'work.task_status.todo': { es: 'Por hacer', en: 'To do' },
+    'work.task_status.in_progress': { es: 'En progreso', en: 'In progress' },
+    'work.task_status.done': { es: 'Hecho', en: 'Done' },
+    'work.task_priority.low': { es: 'Baja', en: 'Low' },
+    'work.task_priority.medium': { es: 'Media', en: 'Medium' },
+    'work.task_priority.high': { es: 'Alta', en: 'High' },
+    'work.task_priority.urgent': { es: 'Urgente', en: 'Urgent' },
+
+    // Projects list
+    'work.projects.title': { es: 'Proyectos', en: 'Projects' },
+    'work.projects.subtitle': {
+        es: 'Organiza el trabajo de tu equipo en proyectos y tareas.',
+        en: "Organize your team's work into projects and tasks.",
+    },
+    'work.projects.total': { es: 'Total', en: 'Total' },
+    'work.projects.empty': {
+        es: 'Aún no hay proyectos.',
+        en: 'No projects yet.',
+    },
+    'work.projects.tasks': { es: 'Tareas', en: 'Tasks' },
+    'work.projects.open_tasks': { es: 'Abiertas', en: 'Open' },
+    'work.projects.back': { es: 'Volver a proyectos', en: 'Back to projects' },
+
+    // Project actions
+    'work.project.create': { es: 'Crear proyecto', en: 'Create project' },
+    'work.project.create.submit': { es: 'Crear proyecto', en: 'Create project' },
+    'work.project.creating': { es: 'Creando…', en: 'Creating…' },
+    'work.project.starts_as': { es: 'Comienza como', en: 'Starts as' },
+    'work.project.name': { es: 'Nombre', en: 'Name' },
+    'work.project.description': { es: 'Descripción', en: 'Description' },
+    'work.project.transition': { es: 'Cambiar estado', en: 'Change status' },
+    'work.project.edit': { es: 'Editar proyecto', en: 'Edit project' },
+    'work.project.edit.cancel': { es: 'Cancelar edición', en: 'Cancel editing' },
+    'work.project.edit.submit': { es: 'Guardar cambios', en: 'Save changes' },
+    'work.project.archived_notice': {
+        es: 'Este proyecto está archivado. Las tareas son de solo lectura.',
+        en: 'This project is archived. Tasks are read-only.',
+    },
+
+    // Tasks & board
+    'work.task.create': { es: 'Nueva tarea', en: 'New task' },
+    'work.task.create.submit': { es: 'Crear tarea', en: 'Create task' },
+    'work.task.creating': { es: 'Creando…', en: 'Creating…' },
+    'work.task.title': { es: 'Título', en: 'Title' },
+    'work.task.description': { es: 'Descripción', en: 'Description' },
+    'work.task.status': { es: 'Estado', en: 'Status' },
+    'work.task.priority': { es: 'Prioridad', en: 'Priority' },
+    'work.task.assignee': { es: 'Responsable', en: 'Assignee' },
+    'work.task.assign': { es: 'Asignar responsable', en: 'Assign member' },
+    'work.task.unassigned': { es: 'Sin asignar', en: 'Unassigned' },
+    'work.task.due_date': { es: 'Fecha límite', en: 'Due date' },
+    'work.task.edit': { es: 'Editar tarea', en: 'Edit task' },
+    'work.task.edit.cancel': { es: 'Cancelar', en: 'Cancel' },
+    'work.task.edit.submit': { es: 'Guardar', en: 'Save' },
+    'work.board.column_empty': {
+        es: 'Sin tareas en esta columna.',
+        en: 'No tasks in this column.',
+    },
+
+    // Shared work UI
+    'work.saving': { es: 'Guardando…', en: 'Saving…' },
+    'work.filters.all': { es: 'Todas', en: 'All' },
+    'work.filters.apply': { es: 'Filtrar', en: 'Filter' },
+    'work.filters.clear': { es: 'Limpiar', en: 'Clear' },
 };
 
 type I18nContextValue = {

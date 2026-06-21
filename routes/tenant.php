@@ -6,6 +6,8 @@ use App\Http\Controllers\Tenant\Auth\LoginController;
 use App\Http\Controllers\Tenant\DashboardController;
 use App\Http\Controllers\Tenant\LandingController;
 use App\Http\Controllers\Tenant\MemberController;
+use App\Http\Controllers\Tenant\ProjectController;
+use App\Http\Controllers\Tenant\TaskController;
 use App\Http\Middleware\EnsureTenantIsActive;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -69,5 +71,29 @@ Route::middleware([
         Route::post('/members', [MemberController::class, 'store'])->name('tenant.members.store');
         Route::patch('/members/{user}', [MemberController::class, 'update'])->name('tenant.members.update');
         Route::delete('/members/{user}', [MemberController::class, 'destroy'])->name('tenant.members.destroy');
+
+        /*
+         * Projects & tasks (slice-004 §C8). Projects + tasks live in the TENANT DB
+         * (database/migrations/tenant) — isolation is by connection, so {project}
+         * and {task} bind on the tenant connection and a cross-tenant id 404s.
+         * index/show are open to any member; project mutations add an admin+ gate
+         * inside ProjectController; task mutations are open to any member. The
+         * nested task routes use scopeBindings() so a {task} must belong to the
+         * bound {project} (404 otherwise). No closures; every route named.
+         */
+        Route::get('/projects', [ProjectController::class, 'index'])->name('tenant.projects.index');
+        Route::post('/projects', [ProjectController::class, 'store'])->name('tenant.projects.store');
+        Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('tenant.projects.show');
+        Route::patch('/projects/{project}', [ProjectController::class, 'update'])->name('tenant.projects.update');
+        Route::patch('/projects/{project}/status', [ProjectController::class, 'transition'])->name('tenant.projects.transition');
+
+        Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])
+            ->name('tenant.tasks.store');
+        Route::patch('/projects/{project}/tasks/{task}', [TaskController::class, 'update'])
+            ->scopeBindings()->name('tenant.tasks.update');
+        Route::patch('/projects/{project}/tasks/{task}/status', [TaskController::class, 'transition'])
+            ->scopeBindings()->name('tenant.tasks.transition');
+        Route::patch('/projects/{project}/tasks/{task}/assignee', [TaskController::class, 'assign'])
+            ->scopeBindings()->name('tenant.tasks.assign');
     });
 });

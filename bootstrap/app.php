@@ -8,6 +8,9 @@ use App\Domain\Membership\Exceptions\OwnerSingletonException;
 use App\Domain\Membership\Exceptions\RoleNotAssignableException;
 use App\Domain\Membership\Exceptions\SeatLimitExceededException;
 use App\Domain\Platform\Exceptions\TenantTransitionException;
+use App\Domain\Work\Exceptions\InvalidProjectTransitionException;
+use App\Domain\Work\Exceptions\InvalidTaskTransitionException;
+use App\Domain\Work\Exceptions\ProjectArchivedException;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
@@ -121,5 +124,37 @@ return Application::configure(basePath: dirname(__DIR__))
             return $request->expectsJson()
                 ? response()->json(['message' => $e->getMessage()], 422)
                 : back()->withErrors(['status' => $e->getMessage()]);
+        });
+
+        // The three Work (projects & tasks) guards (slice-004 §C5) are
+        // state-machine / integrity rules, not server faults: each surfaces as a
+        // graceful 302 + a flash error on web (422 JSON on API), NEVER a 500. The
+        // Actions throw as a pre-check BEFORE persisting, so no illegal status
+        // transition and no mutation of an archived project's tasks is ever
+        // written. A flash (`error`) — not a field error — since these are not
+        // tied to a single form control; the board surfaces them inline.
+
+        // An illegal project status edge (e.g. archived → completed): the
+        // state machine refused the transition.
+        $exceptions->render(function (InvalidProjectTransitionException $e, Request $request) {
+            return $request->expectsJson()
+                ? response()->json(['message' => $e->getMessage()], 422)
+                : back()->with('error', __('work.errors.invalid_project_transition'));
+        });
+
+        // An illegal task status edge (e.g. todo → done): the state machine
+        // refused the transition.
+        $exceptions->render(function (InvalidTaskTransitionException $e, Request $request) {
+            return $request->expectsJson()
+                ? response()->json(['message' => $e->getMessage()], 422)
+                : back()->with('error', __('work.errors.invalid_task_transition'));
+        });
+
+        // A mutation (create/update/transition/assign task) targeting an ARCHIVED
+        // project: archived projects are read-only for their tasks.
+        $exceptions->render(function (ProjectArchivedException $e, Request $request) {
+            return $request->expectsJson()
+                ? response()->json(['message' => $e->getMessage()], 422)
+                : back()->with('error', __('work.errors.project_archived'));
         });
     })->create();

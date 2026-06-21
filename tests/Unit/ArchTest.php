@@ -51,9 +51,9 @@ arch('central controllers do not touch the tenant User model')
 | Platform domain (slice 003 — the CENTRAL platform-admin console). Same DDD-Lite
 | guarantees as the other domains, PLUS the central↛tenant rule: the console
 | operates ONLY on the central registry and must never import or query a
-| per-tenant model (App\Models\User / App\Models\Note). The Central controllers
-| are already covered above; here we extend the guard to the whole Platform
-| domain layer.
+| per-tenant model (App\Models\User / the tenant-side Work models). The Central
+| controllers are already covered above; here we extend the guard to the whole
+| Platform domain layer.
 */
 arch('platform domain stays off the HTTP layer')
     ->expect('App\Domain\Platform')
@@ -73,9 +73,13 @@ arch('the platform domain never touches the per-tenant User model')
     ->expect('App\Domain\Platform')
     ->not->toUse('App\Models\User');
 
-arch('the platform domain never touches the per-tenant Note model')
+arch('the platform domain never touches the tenant-side Work Project model')
     ->expect('App\Domain\Platform')
-    ->not->toUse('App\Models\Note');
+    ->not->toUse('App\Domain\Work\Models\Project');
+
+arch('the platform domain never touches the tenant-side Work Task model')
+    ->expect('App\Domain\Platform')
+    ->not->toUse('App\Domain\Work\Models\Task');
 
 arch('the tenant-transition exception is final')
     ->expect('App\Domain\Platform\Exceptions\TenantTransitionException')
@@ -116,17 +120,51 @@ arch('the domain layer never reaches into HTTP controllers')
 /*
 | Central ↛ tenant coupling guard. The central registration/provisioning
 | controllers operate ONLY on the central registry; they must never import the
-| per-tenant Note model (tenant data is read inside tenant context, by the
-| tenant landing controller — never from a central controller).
+| tenant-side Work models (tenant data is read inside tenant context, by the
+| tenant controllers — never from a central controller).
 */
-arch('central controllers do not touch per-tenant models')
+arch('central controllers do not touch the tenant-side Work models')
     ->expect('App\Http\Controllers\Central')
-    ->not->toUse('App\Models\Note');
+    ->not->toUse(['App\Domain\Work\Models\Project', 'App\Domain\Work\Models\Task']);
 
 /*
 | The provisioning activation job mutates only the central tenant registry;
-| it must not import per-tenant models (it runs AFTER tenant context ended).
+| it must not import tenant-side models (it runs AFTER tenant context ended).
 */
-arch('the activation job does not touch per-tenant models')
+arch('the activation job does not touch the tenant-side Work models')
     ->expect('App\Domain\Tenancy\Jobs')
-    ->not->toUse('App\Models\Note');
+    ->not->toUse(['App\Domain\Work\Models\Project', 'App\Domain\Work\Models\Task']);
+
+/*
+| Work domain (slice 004 — the TENANT-side projects/tasks board). Same DDD-Lite
+| guarantees as the other domains: HTTP-agnostic, backed enums, final actions +
+| DTOs + exceptions. Tasks/projects live in the tenant DB; the domain layer
+| never reaches into the HTTP layer.
+*/
+arch('work domain stays off the HTTP layer')
+    ->expect('App\Domain\Work')
+    ->not->toUse('Illuminate\Http');
+
+arch('work enums are backed')
+    ->expect('App\Domain\Work\Enums')
+    ->toBeEnums();
+
+arch('work actions are final classes')
+    ->expect('App\Domain\Work\Actions')
+    ->toBeClasses()
+    ->toBeFinal();
+
+arch('work DTOs are final')
+    ->expect('App\Domain\Work\Data')
+    ->toBeClasses()
+    ->toBeFinal();
+
+arch('work exceptions are final')
+    ->expect('App\Domain\Work\Exceptions')
+    ->toBeClasses()
+    ->toBeFinal();
+
+arch('work models are final')
+    ->expect('App\Domain\Work\Models')
+    ->toBeClasses()
+    ->toBeFinal();
