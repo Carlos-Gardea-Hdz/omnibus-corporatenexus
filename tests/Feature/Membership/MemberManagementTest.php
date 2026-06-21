@@ -77,7 +77,8 @@ function provisionMemberTenant(string $name, string $subdomain, TenantPlan $plan
     ]);
     tenancy()->end();
 
-    return $tenant;
+    // Synchronously provisioned → mark Active so EnsureTenantIsActive serves it.
+    return markTenantActive($tenant);
 }
 
 function memberHost(Tenant $tenant): string

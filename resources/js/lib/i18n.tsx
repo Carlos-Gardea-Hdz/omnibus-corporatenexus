@@ -147,6 +147,94 @@ const dictionary: Dictionary = {
         es: 'Guarda esta contraseña temporal del propietario. Solo se muestra una vez.',
         en: 'Save this temporary owner password. It is shown only once.',
     },
+
+    // --- Platform admin console (Slice 003 — mirrors lang/{es,en}/platform.php) ---
+    'platform.console': { es: 'Consola de plataforma', en: 'Platform console' },
+    'platform.login.title': {
+        es: 'Acceso de administrador de plataforma',
+        en: 'Platform admin sign in',
+    },
+    'platform.login.subtitle': {
+        es: 'Solo para operadores de la plataforma.',
+        en: 'For platform operators only.',
+    },
+    'platform.login.email': { es: 'Correo electrónico', en: 'Email' },
+    'platform.login.password': { es: 'Contraseña', en: 'Password' },
+    'platform.login.submit': { es: 'Entrar', en: 'Sign in' },
+    'platform.login.submitting': { es: 'Entrando…', en: 'Signing in…' },
+    'platform.logout': { es: 'Cerrar sesión', en: 'Sign out' },
+
+    'platform.dashboard.title': { es: 'Organizaciones', en: 'Tenants' },
+    'platform.dashboard.subtitle': {
+        es: 'Todas las organizaciones registradas en la plataforma.',
+        en: 'Every organization registered on the platform.',
+    },
+    'platform.dashboard.filters.status': { es: 'Estado', en: 'Status' },
+    'platform.dashboard.filters.plan': { es: 'Plan', en: 'Plan' },
+    'platform.dashboard.filters.all': { es: 'Todos', en: 'All' },
+    'platform.dashboard.filters.apply': { es: 'Filtrar', en: 'Filter' },
+    'platform.dashboard.filters.clear': { es: 'Limpiar', en: 'Clear' },
+    'platform.dashboard.empty': {
+        es: 'Ninguna organización coincide con estos filtros.',
+        en: 'No tenants match these filters.',
+    },
+    'platform.dashboard.total': { es: 'Total', en: 'Total' },
+    'platform.dashboard.table.name': { es: 'Organización', en: 'Organization' },
+    'platform.dashboard.table.subdomain': { es: 'Subdominio', en: 'Subdomain' },
+    'platform.dashboard.table.status': { es: 'Estado', en: 'Status' },
+    'platform.dashboard.table.plan': { es: 'Plan', en: 'Plan' },
+    'platform.dashboard.table.owner': { es: 'Propietario', en: 'Owner' },
+    'platform.dashboard.table.created': { es: 'Creada', en: 'Created' },
+    'platform.dashboard.view': { es: 'Ver', en: 'View' },
+    'platform.pagination.previous': { es: 'Anterior', en: 'Previous' },
+    'platform.pagination.next': { es: 'Siguiente', en: 'Next' },
+    'platform.pagination.page': { es: 'Página', en: 'Page' },
+    'platform.pagination.of': { es: 'de', en: 'of' },
+
+    'platform.tenant.detail_title': {
+        es: 'Detalle de la organización',
+        en: 'Tenant detail',
+    },
+    'platform.tenant.back': { es: 'Volver a organizaciones', en: 'Back to tenants' },
+    'platform.tenant.owner_email': { es: 'Correo del propietario', en: 'Owner email' },
+    'platform.tenant.created_at': { es: 'Creada', en: 'Created' },
+    'platform.tenant.status': { es: 'Estado', en: 'Status' },
+    'platform.tenant.plan': { es: 'Plan', en: 'Plan' },
+    'platform.tenant.seat_limit': { es: 'Límite de asientos', en: 'Seat limit' },
+    'platform.tenant.seat_limit.unlimited': { es: 'Ilimitados', en: 'Unlimited' },
+    'platform.tenant.price': { es: 'Precio', en: 'Price' },
+    'platform.tenant.price.per_month': { es: '/mes', en: '/mo' },
+    'platform.tenant.features': { es: 'Funciones', en: 'Features' },
+    'platform.tenant.feature.active': { es: 'Activa', en: 'Active' },
+    'platform.tenant.feature.inactive': { es: 'Inactiva', en: 'Inactive' },
+    'platform.tenant.over_limit': {
+        es: 'Sobre el límite de asientos',
+        en: 'Over seat limit',
+    },
+    'platform.tenant.seats_over': {
+        es: 'asientos por encima del plan',
+        en: 'seats over the plan',
+    },
+
+    'platform.actions.title': { es: 'Acciones', en: 'Actions' },
+    'platform.actions.suspend': { es: 'Suspender', en: 'Suspend' },
+    'platform.actions.suspending': { es: 'Suspendiendo…', en: 'Suspending…' },
+    'platform.actions.suspend.confirm': {
+        es: '¿Suspender esta organización? Dejará de servir hasta reactivarla.',
+        en: 'Suspend this tenant? It will stop serving until reactivated.',
+    },
+    'platform.actions.reactivate': { es: 'Reactivar', en: 'Reactivate' },
+    'platform.actions.reactivating': { es: 'Reactivando…', en: 'Reactivating…' },
+    'platform.actions.change_plan': { es: 'Cambiar plan', en: 'Change plan' },
+    'platform.actions.changing_plan': { es: 'Cambiando…', en: 'Changing…' },
+    'platform.actions.change_plan.label': {
+        es: 'Nuevo plan',
+        en: 'New plan',
+    },
+    'platform.actions.none': {
+        es: 'No hay acciones disponibles para esta organización.',
+        en: 'No actions are available for this tenant.',
+    },
 };
 
 type I18nContextValue = {

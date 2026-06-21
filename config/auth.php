@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Platform\Models\PlatformAdmin;
 use App\Models\User;
 
 return [
@@ -44,6 +45,17 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Central platform-admin console (slice 003). A SEPARATE guard against
+        // the CENTRAL `platform_admins` table — distinct from the tenant `web`
+        // guard, which resolves the per-tenant `users` table after tenancy
+        // identification. A tenant user can never authenticate here, and a
+        // platform admin can never authenticate a tenant (the central↛tenant
+        // isolation), because the provider models live in different databases.
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'platform_admins',
+        ],
     ],
 
     /*
@@ -67,6 +79,13 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        // Platform admins live in the CENTRAL database (the model pins the
+        // central connection). The `admin` guard resolves credentials here.
+        'platform_admins' => [
+            'driver' => 'eloquent',
+            'model' => PlatformAdmin::class,
         ],
 
         // 'users' => [

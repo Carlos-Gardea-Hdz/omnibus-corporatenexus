@@ -6,6 +6,7 @@ use App\Http\Controllers\Tenant\Auth\LoginController;
 use App\Http\Controllers\Tenant\DashboardController;
 use App\Http\Controllers\Tenant\LandingController;
 use App\Http\Controllers\Tenant\MemberController;
+use App\Http\Middleware\EnsureTenantIsActive;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -31,6 +32,10 @@ Route::middleware([
     'web',
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
+    // A SUSPENDED tenant (central status ≠ Active) stops serving: 503 with a
+    // Retry-After hint. Runs AFTER identification so `tenant()` is resolved, and
+    // reads ONLY the central status enum — never per-tenant data (slice 003 §3).
+    EnsureTenantIsActive::class,
 ])->group(function (): void {
     Route::get('/', [LandingController::class, 'index'])->name('tenant.landing');
 

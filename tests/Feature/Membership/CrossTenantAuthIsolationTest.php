@@ -72,7 +72,8 @@ function provisionAuthIsolationTenant(string $name, string $subdomain): Tenant
     ]);
     tenancy()->end();
 
-    return $tenant;
+    // Synchronously provisioned → mark Active so EnsureTenantIsActive serves it.
+    return markTenantActive($tenant);
 }
 
 it('lets a tenant-A user log in on A but rejects the IDENTICAL credentials on B', function () use (&$provisioned): void {

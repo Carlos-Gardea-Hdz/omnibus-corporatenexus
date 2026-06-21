@@ -77,7 +77,8 @@ function provisionCredentialTenant(string $name, string $subdomain): Tenant
     ]);
     tenancy()->end();
 
-    return $tenant;
+    // Synchronously provisioned → mark Active so EnsureTenantIsActive serves it.
+    return markTenantActive($tenant);
 }
 
 function credentialHost(Tenant $tenant): string

@@ -35,5 +35,8 @@ final class DatabaseSeeder extends Seeder
                 plan: $entry['plan'],
             ));
         }
+
+        // Opt-in: mints the first platform operator only when env-gated (OQ-3).
+        $this->call(PlatformAdminSeeder::class);
     }
 }

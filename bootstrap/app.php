@@ -7,6 +7,7 @@ use App\Domain\Membership\Exceptions\CannotRemoveSelfException;
 use App\Domain\Membership\Exceptions\OwnerSingletonException;
 use App\Domain\Membership\Exceptions\RoleNotAssignableException;
 use App\Domain\Membership\Exceptions\SeatLimitExceededException;
+use App\Domain\Platform\Exceptions\TenantTransitionException;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
@@ -38,15 +39,26 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
 
-        // Guests hitting an `auth` route (dashboard / members) are sent to the
-        // tenant login. The redirect MUST resolve to the TENANT host the guest
-        // actually hit — `route('tenant.login')` would build the URL on the
-        // configured app host (the central apex), bouncing the user off-tenant.
-        // Building `/login` against the live request scheme+host keeps the
-        // redirect on the same tenant subdomain (slice-002 §7, risk N1).
-        $middleware->redirectGuestsTo(
-            fn (Request $request): string => $request->getSchemeAndHttpHost().'/login',
-        );
+        // Guests hitting an `auth` route are redirected to the right login.
+        //
+        // Two distinct consoles share this single callback:
+        //  - The CENTRAL platform-admin console lives under `/admin` on the apex
+        //    host (slice 003, `auth:admin`). A guest there goes to the absolute
+        //    central login `route('platform.login')` — a single central host, so
+        //    `route()` is correct (no host rewrite, risk R1).
+        //  - The TENANT shell (dashboard / members, `auth`) must resolve to the
+        //    TENANT host the guest actually hit — `route('tenant.login')` would
+        //    build the URL on the configured app host (the central apex),
+        //    bouncing the user off-tenant. Building `/login` against the live
+        //    request scheme+host keeps the redirect on the same tenant subdomain
+        //    (slice-002 §7, risk N1).
+        $middleware->redirectGuestsTo(function (Request $request): string {
+            if ($request->is('admin', 'admin/*')) {
+                return route('platform.login');
+            }
+
+            return $request->getSchemeAndHttpHost().'/login';
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // The five Membership management guards (slice-002 §5 / CONTRACT) are
@@ -98,5 +110,16 @@ return Application::configure(basePath: dirname(__DIR__))
             return $request->expectsJson()
                 ? response()->json(['message' => $e->getMessage()], 422)
                 : back()->withErrors(['member' => $e->getMessage()]);
+        });
+
+        // Platform-admin lifecycle guard (slice 003). An illegal tenant status
+        // transition (e.g. suspending a Pending tenant, reactivating an Active
+        // one) is an integrity rule, not a server fault: a graceful 302 + a
+        // `status` field error on web (422 JSON on API), NEVER a 500. The Action
+        // throws BEFORE persisting, so no illegal status is ever written.
+        $exceptions->render(function (TenantTransitionException $e, Request $request) {
+            return $request->expectsJson()
+                ? response()->json(['message' => $e->getMessage()], 422)
+                : back()->withErrors(['status' => $e->getMessage()]);
         });
     })->create();

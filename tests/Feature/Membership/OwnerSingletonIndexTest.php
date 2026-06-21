@@ -70,7 +70,8 @@ function provisionIndexTenant(string $name, string $subdomain): Tenant
     ]);
     tenancy()->end();
 
-    return $tenant;
+    // Synchronously provisioned → mark Active so EnsureTenantIsActive serves it.
+    return markTenantActive($tenant);
 }
 
 it('rejects a second owner at the database level (partial unique index)', function () use (&$provisioned): void {

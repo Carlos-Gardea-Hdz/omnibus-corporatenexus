@@ -25,3 +25,13 @@ export type MemberData = App.Domain.Membership.Data.MemberData;
 export type LoginData = App.Domain.Membership.Data.LoginData;
 export type InviteMemberData = App.Domain.Membership.Data.InviteMemberData;
 export type UpdateMemberRoleData = App.Domain.Membership.Data.UpdateMemberRoleData;
+
+/**
+ * Platform admin console (Slice 003). The console pages model their props with
+ * local row shapes (snake_case, matching the central controllers); the only
+ * generated types they consume are the `TenantStatus` / `TenantPlan` enums
+ * aliased above. The full `App.Domain.Platform.Data.*` DTO aliases are
+ * intentionally omitted here until the backend runs
+ * `php artisan typescript:transform` and they land in generated.d.ts — adding
+ * them before then would reference a namespace that does not yet exist.
+ */

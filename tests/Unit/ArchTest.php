@@ -47,6 +47,40 @@ arch('central controllers do not touch the tenant User model')
     ->expect('App\Http\Controllers\Central')
     ->not->toUse('App\Models\User');
 
+/*
+| Platform domain (slice 003 — the CENTRAL platform-admin console). Same DDD-Lite
+| guarantees as the other domains, PLUS the central↛tenant rule: the console
+| operates ONLY on the central registry and must never import or query a
+| per-tenant model (App\Models\User / App\Models\Note). The Central controllers
+| are already covered above; here we extend the guard to the whole Platform
+| domain layer.
+*/
+arch('platform domain stays off the HTTP layer')
+    ->expect('App\Domain\Platform')
+    ->not->toUse('Illuminate\Http');
+
+arch('platform actions are final classes')
+    ->expect('App\Domain\Platform\Actions')
+    ->toBeClasses()
+    ->toBeFinal();
+
+arch('platform DTOs are final')
+    ->expect('App\Domain\Platform\Data')
+    ->toBeClasses()
+    ->toBeFinal();
+
+arch('the platform domain never touches the per-tenant User model')
+    ->expect('App\Domain\Platform')
+    ->not->toUse('App\Models\User');
+
+arch('the platform domain never touches the per-tenant Note model')
+    ->expect('App\Domain\Platform')
+    ->not->toUse('App\Models\Note');
+
+arch('the tenant-transition exception is final')
+    ->expect('App\Domain\Platform\Exceptions\TenantTransitionException')
+    ->toBeFinal();
+
 arch('actions are final and live in the domain layer')
     ->expect('App\Domain\Tenancy\Actions')
     ->toBeClasses()

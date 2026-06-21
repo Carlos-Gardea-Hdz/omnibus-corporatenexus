@@ -71,7 +71,8 @@ function provisionForIdentification(string $name, string $subdomain): Tenant
     ]);
     tenancy()->end();
 
-    return $tenant;
+    // Synchronously provisioned → mark Active so EnsureTenantIsActive serves it.
+    return markTenantActive($tenant);
 }
 
 it('boots the tenant database from the request host and exposes the tenant note count', function () use (&$provisioned): void {
