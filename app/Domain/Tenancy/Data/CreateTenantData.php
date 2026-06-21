@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Tenancy\Data;
 
 use App\Domain\Tenancy\Enums\TenantPlan;
+use App\Domain\Tenancy\Rules\UniqueSubdomain;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Attributes\Validation\AlphaDash;
@@ -35,17 +36,34 @@ final class CreateTenantData extends Data
     ) {}
 
     /**
-     * Extra rules that cannot be expressed as attributes (reserved subdomains).
+     * Extra rules that cannot be expressed as attributes: the reserved-subdomain
+     * allowlist and uniqueness of the derived host. Uniqueness is enforced here
+     * (302 + session error) AND defensively re-checked in the CreateTenant
+     * Action (race-safe exception) — never trust a single layer (security §0).
      *
-     * @return array<string, list<ValidationRule>>
+     * @return array<string, list<ValidationRule|string>>
      */
     public static function rules(): array
     {
         /** @var ValidationRule $notReserved */
-        $notReserved = Rule::notIn(['www', 'app', 'admin', 'api', 'mail', 'central', 'nexus']);
+        $notReserved = Rule::notIn([
+            'www', 'app', 'admin', 'api', 'mail', 'central', 'nexus',
+            'dashboard', 'billing', 'support', 'status', 'assets',
+            'static', 'cdn', 'blog', 'help', 'docs', 'internal',
+        ]);
 
+        // Spatie Data's rules() OVERRIDES the attribute rules for this field, so the
+        // full subdomain contract must live here — NOT just the reserved/unique extras.
+        // The regex is a real DNS label (lowercase alphanumeric segments joined by single
+        // dashes): it rejects underscores and leading/trailing/consecutive dashes that
+        // AlphaDash would wrongly allow.
         return [
-            'subdomain' => [$notReserved],
+            'subdomain' => [
+                'required', 'string', 'min:2', 'max:63',
+                'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/',
+                $notReserved,
+                new UniqueSubdomain,
+            ],
         ];
     }
 }

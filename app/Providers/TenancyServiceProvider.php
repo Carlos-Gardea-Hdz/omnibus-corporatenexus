@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Domain\Tenancy\Jobs\MarkTenantActive;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -65,6 +66,8 @@ final class TenancyServiceProvider extends ServiceProvider
                 JobPipeline::make([
                     Jobs\CreateDatabase::class,
                     Jobs\MigrateDatabase::class,
+                    Jobs\SeedDatabase::class,
+                    MarkTenantActive::class,
                 ])->send(static fn (Events\TenantCreated $event) => $event->tenant)
                     ->shouldBeQueued(true),
             ],

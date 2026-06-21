@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Tenancy\Models\Tenant;
 use App\Domain\Tenancy\Models\Uuid7Generator;
+use Database\Seeders\TenantDatabaseSeeder;
 use Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper;
 use Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper;
 use Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper;
@@ -204,7 +205,11 @@ return [
      * Parameters used by the tenants:seed command.
      */
     'seeder_parameters' => [
-        '--class' => 'DatabaseSeeder', // root seeder class
-        // '--force' => true, // This needs to be true to seed tenant databases in production
+        // TENANT seeder (runs inside each tenant DB via the SeedDatabase job).
+        '--class' => TenantDatabaseSeeder::class,
+        // Required: the queued worker runs non-interactively, and without --force the
+        // db:seed ConfirmableTrait silently no-ops in production → a tenant would go
+        // Active with an EMPTY database. Mirrors migration_parameters above.
+        '--force' => true,
     ],
 ];

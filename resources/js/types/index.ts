@@ -10,6 +10,7 @@
 
 export type TenantData = App.Domain.Tenancy.Data.TenantData;
 export type CreateTenantData = App.Domain.Tenancy.Data.CreateTenantData;
+export type PlanOptionData = App.Domain.Tenancy.Data.PlanOptionData;
 export type TenantStatus = App.Domain.Tenancy.Enums.TenantStatus;
 export type TenantPlan = App.Domain.Tenancy.Enums.TenantPlan;
 export type TenantFeature = App.Domain.Tenancy.Enums.TenantFeature;

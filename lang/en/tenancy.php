@@ -6,6 +6,7 @@ return [
     'status' => [
         'pending' => 'Pending',
         'active' => 'Active',
+        'failed' => 'Failed',
         'suspended' => 'Suspended',
         'archived' => 'Archived',
     ],
@@ -14,5 +15,8 @@ return [
         'team' => 'Team',
         'business' => 'Business',
         'enterprise' => 'Enterprise',
+    ],
+    'subdomain' => [
+        'taken' => 'That subdomain is already in use.',
     ],
 ];

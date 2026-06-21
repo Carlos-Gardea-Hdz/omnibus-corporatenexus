@@ -11,6 +11,7 @@ enum TenantStatus: string
 {
     case Pending = 'pending';
     case Active = 'active';
+    case Failed = 'failed';
     case Suspended = 'suspended';
     case Archived = 'archived';
 
@@ -22,6 +23,7 @@ enum TenantStatus: string
         return match ($this) {
             self::Pending => __('tenancy.status.pending'),
             self::Active => __('tenancy.status.active'),
+            self::Failed => __('tenancy.status.failed'),
             self::Suspended => __('tenancy.status.suspended'),
             self::Archived => __('tenancy.status.archived'),
         };
@@ -35,6 +37,7 @@ enum TenantStatus: string
         return match ($this) {
             self::Pending => 'amber',
             self::Active => 'emerald',
+            self::Failed => 'red',
             self::Suspended => 'rose',
             self::Archived => 'slate',
         };
@@ -54,8 +57,9 @@ enum TenantStatus: string
     public function canTransitionTo(self $target): bool
     {
         return match ($this) {
-            self::Pending => in_array($target, [self::Active, self::Archived], true),
+            self::Pending => in_array($target, [self::Active, self::Failed, self::Archived], true),
             self::Active => in_array($target, [self::Suspended, self::Archived], true),
+            self::Failed => in_array($target, [self::Pending, self::Archived], true),
             self::Suspended => in_array($target, [self::Active, self::Archived], true),
             self::Archived => false,
         };

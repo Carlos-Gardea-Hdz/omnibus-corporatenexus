@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Central\ProvisioningStatusController;
 use App\Http\Controllers\Central\TenantRegistrationController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +27,9 @@ Route::middleware('web')->group(function (): void {
     Route::post('/register', [TenantRegistrationController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('tenant.register.store');
+
+    // Provisioning-status page. Route-model binding resolves the Tenant on the
+    // central connection (UUIDv7 key). The React page polls it while pending.
+    Route::get('/provisioning/{tenant}', [ProvisioningStatusController::class, 'show'])
+        ->name('central.provisioning');
 });

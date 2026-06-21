@@ -46,4 +46,17 @@ enum TenantPlan: string
             self::Enterprise => 0,
         };
     }
+
+    /**
+     * Monthly price in INTEGER CENTS (never float). 0 = free / "contact sales".
+     */
+    public function priceCents(): int
+    {
+        return match ($this) {
+            self::Free => 0,
+            self::Team => 2900,
+            self::Business => 9900,
+            self::Enterprise => 0, // contact sales
+        };
+    }
 }

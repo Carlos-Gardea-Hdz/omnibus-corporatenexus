@@ -5,6 +5,12 @@ subdomain: string;
 ownerEmail: string;
 plan: App.Domain.Tenancy.Enums.TenantPlan;
 };
+export type PlanOptionData = {
+value: string;
+label: string;
+price_cents: number;
+seat_limit: number;
+};
 export type TenantData = {
 id: string;
 name: string;
@@ -15,5 +21,5 @@ plan: App.Domain.Tenancy.Enums.TenantPlan;
 declare namespace App.Domain.Tenancy.Enums {
 export type TenantFeature = 'advanced-analytics' | 'sso-saml' | 'audit-log-export' | 'beta-workspace-ui';
 export type TenantPlan = 'free' | 'team' | 'business' | 'enterprise';
-export type TenantStatus = 'pending' | 'active' | 'suspended' | 'archived';
+export type TenantStatus = 'pending' | 'active' | 'failed' | 'suspended' | 'archived';
 }

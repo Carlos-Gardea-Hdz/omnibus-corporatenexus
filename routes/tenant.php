@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Tenant\DashboardController;
+use App\Http\Controllers\Tenant\LandingController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -24,5 +24,5 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function (): void {
-    Route::get('/', [DashboardController::class, 'index'])->name('tenant.dashboard');
+    Route::get('/', [LandingController::class, 'index'])->name('tenant.landing');
 });
